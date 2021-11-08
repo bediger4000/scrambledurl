@@ -1,12 +1,20 @@
 # Unscramble a scrambled URL
 
+## Problem statement
+
+The problem statement follows.
+I copied it literally because there's no good way to summarize and retain
+any meaning.
+
+---
+
 Found at [https://dev.to/0shuvo0/can-you-solve-this-interview-problem-4gaa](https://dev.to/0shuvo0/can-you-solve-this-interview-problem-4gaa)
 
 So few days ago I applied to a MNC and I had some interesting problems to
 solve in given amount of time.
 So let me share one with you, see if you can solve this.
 
-## Problem Description
+### Problem Description
 
 So let's say we have a URL something like this:
 ```
@@ -45,3 +53,4 @@ let decoded = atob(urlStr)
 ```
 
 Now go and and see if you can solve this. Best of luck 
+---
