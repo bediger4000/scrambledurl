@@ -9,22 +9,24 @@ import (
 )
 
 func main() {
-	iter := newIterator(os.Args[1:])
 
-	for {
-		str, done := iter.Next()
-		if done {
-			break
-		}
+	c := make(chan string, 0)
+
+	go permute(c, os.Args[1:])
+
+	for str := range c {
+
 		originalStringBytes, err := base64.StdEncoding.DecodeString(str)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "base64 decode: %v\n", err)
 			continue
 		}
+
 		candidate := string(originalStringBytes)
 		if !strings.HasPrefix(candidate, "http://") && !strings.HasPrefix(candidate, "https://") {
 			continue
 		}
+
 		notPrintable := false
 		for _, r := range candidate {
 			if !unicode.IsPrint(r) {
@@ -39,72 +41,41 @@ func main() {
 	}
 }
 
-type iterator struct {
-	max     int
-	current []int
-	items   []string
+// permute creates all permutations of the slice-of-strings it
+// receives as a formal argument, one string by concatenating
+// a permutation of the argument ary.
+// The strings created by concatenating a permutation get written
+// to a channel. This function closes the channel when func realPermute
+// returns, so that the channel reader can just range over reading the
+// channel.
+func permute(c chan string, ary []string) {
+	realPermute(c, "", ary)
+	close(c)
 }
 
-func newIterator(ary []string) *iterator {
-	l := len(ary)
-
-	i := &iterator{
-		max:     l,
-		current: make([]int, l),
-		items:   ary,
+// realPermute receives a channel (to which it writes "output" strings)
+// a string produced by conatenation so far, and a slice of strings.
+func realPermute(c chan string, sofar string, ary []string) {
+	// recurson base case, write the entire string created by permutation,
+	// to the output channel.
+	if len(ary) == 1 {
+		c <- sofar + ary[0]
+		return
 	}
 
-	return i
-}
+	// This function will leave out 1 string in ary, and pass the remaining
+	// pieces of ary as another slice to a recursive call to realPermute.
+	newary := make([]string, len(ary)-1)
 
-// Next returns a string of the concatenated items
-// in the current order. No substring ever appears
-// twice in the returned string. 2nd argument is false,
-// until iteration is finished.
-func (i *iterator) Next() (string, bool) {
-	concatenated := ""
-	done := false
-	for !done && !i.Unique() {
-		done = i.Increment()
-	}
-	if done {
-		return "", done
-	}
-	for j := 0; j < i.max; j++ {
-		concatenated += i.items[i.current[j]]
-	}
-	done = i.Increment()
-	return concatenated, done
-}
-
-func (i *iterator) Increment() bool {
-	done := false
-	i.current[0]++
-	if i.current[0] == i.max {
-		i.current[0] = 0
+	for idx, str := range ary {
 		var j int
-		for j = 1; j < i.max; j++ {
-			i.current[j]++
-			if i.current[j] == i.max {
-				i.current[j] = 0
-			} else {
-				break
+		for i := 0; i < len(ary); i++ {
+			if i == idx {
+				continue
 			}
+			newary[j] = ary[i]
+			j++
 		}
-		if j == i.max {
-			done = true
-		}
+		realPermute(c, sofar+str, newary)
 	}
-	return done
-}
-
-func (i *iterator) Unique() bool {
-	for j := 0; j < i.max; j++ {
-		for k := j + 1; k < i.max; k++ {
-			if i.current[j] == i.current[k] {
-				return false
-			}
-		}
-	}
-	return true
 }
