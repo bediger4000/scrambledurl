@@ -150,3 +150,9 @@ permutation given the loose format(s) that a URL can take.
 Don't use this problem in your interviews, if you're a hiring manager.
 Point out all the flaws if you're a candidate,
 and further, consider it a red flag for the potential employer.
+
+I'll note again that it took me considerably longer than 45 minutes
+to get a working decoder, and longer than that to get a decent,
+non-hacky permutor going, plus some time to experiment with Base64 encoding
+and decoding.
+I would have failed this job interview, so take my analysis with a grain of salt.
